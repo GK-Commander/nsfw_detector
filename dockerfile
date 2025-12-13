@@ -4,10 +4,11 @@ WORKDIR /app
 
 ENV DEBIAN_FRONTEND=noninteractive
 
-# 添加 non-free 仓库
-RUN echo "deb http://deb.debian.org/debian stable main contrib non-free" > /etc/apt/sources.list && \
-    echo "deb http://security.debian.org/debian-security stable-security main contrib non-free" >> /etc/apt/sources.list && \
-    echo "deb http://deb.debian.org/debian stable-updates main contrib non-free" >> /etc/apt/sources.list
+# 添加 non-free 仓库（先删除默认的 sources 文件避免重复）
+RUN rm -f /etc/apt/sources.list.d/debian.sources && \
+    echo "deb http://deb.debian.org/debian stable main contrib non-free non-free-firmware" > /etc/apt/sources.list && \
+    echo "deb http://security.debian.org/debian-security stable-security main contrib non-free non-free-firmware" >> /etc/apt/sources.list && \
+    echo "deb http://deb.debian.org/debian stable-updates main contrib non-free non-free-firmware" >> /etc/apt/sources.list
 
 # 更新包列表
 RUN apt-get update
@@ -29,7 +30,7 @@ RUN apt-get install -y ffmpeg
 
 # OpenCV 相关依赖
 RUN apt-get install -y python3-opencv
-RUN apt-get install -y libgl1-mesa-glx
+RUN apt-get install -y libgl1
 RUN apt-get install -y libglib2.0-0
 RUN apt-get install -y libsm6
 RUN apt-get install -y libxext6
