@@ -1,0 +1,16 @@
+version: '3.8'
+
+services:
+  nsfw-detector:
+    image: chaos-zhu/nsfw_detector:latest
+    container_name: nsfw-detector
+    restart: unless-stopped
+    ports:
+      - "3333:3333"
+    volumes:
+      # 配置文件挂载（可选，用于自定义配置如 auth_token）
+      - ./config:/tmp/config
+      # 如需检测本地文件，请挂载对应目录
+      # - /path/to/files:/path/to/files
+    environment:
+      - TZ=Asia/Shanghai

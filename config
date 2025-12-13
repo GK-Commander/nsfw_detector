@@ -1,3 +1,6 @@
 nsfw_threshold = 0.95
 ffmpeg_max_frames = 30
 ffmpeg_max_timeout = 1800
+# API认证Token（留空则不启用认证）
+# 设置后，请求/check接口增加请求头Authorization: Bearer <token>
+# auth_token = your_secret_token_here

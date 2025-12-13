@@ -172,6 +172,29 @@
             text-align: center;
         }
 
+        .token-section {
+            margin-top: 15px;
+            text-align: center;
+        }
+
+        .token-section input {
+            width: 200px;
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+
+        .token-section input:focus {
+            outline: none;
+            border-color: #2196F3;
+        }
+
+        .token-section input::placeholder {
+            color: #999;
+        }
+
         .scores {
             margin-top: 10px;
             font-size: 0.9em;
@@ -240,6 +263,9 @@
                 <div class="scores" id="scores"></div>
             </div>
             <div class="hint">您上传的文件不会被保留，分析结束立刻删除</div>
+            <div class="token-section">
+                <input type="text" id="tokenInput" placeholder="API Token（可选）">
+            </div>
         </div>
     </div>
 
@@ -264,7 +290,8 @@
                 parseError: '解析响应失败',
                 processing: '正在处理数据...',
                 privacy: '您上传的文件不会被保留，分析结束立刻删除',
-                scores: '评分 - NSFW: {nsfw}, Normal: {normal}'
+                scores: '评分 - NSFW: {nsfw}, Normal: {normal}',
+                tokenPlaceholder: 'API Token（可选）'
             },
             en: {
                 title: 'NSFW File Detection',
@@ -277,7 +304,8 @@
                 parseError: 'Failed to parse response',
                 processing: 'Processing data...',
                 privacy: 'Your uploaded files will not be retained and will be deleted immediately after analysis',
-                scores: 'Scores - NSFW: {nsfw}, Normal: {normal}'
+                scores: 'Scores - NSFW: {nsfw}, Normal: {normal}',
+                tokenPlaceholder: 'API Token (Optional)'
             },
             ja: {
                 title: 'NSFWファイル検出',
@@ -290,7 +318,8 @@
                 parseError: '応答の解析に失敗しました',
                 processing: 'データを処理中...',
                 privacy: 'アップロードされたファイルは保存されず、分析後にすぐに削除されます',
-                scores: 'スコア - NSFW: {nsfw}, Normal: {normal}'
+                scores: 'スコア - NSFW: {nsfw}, Normal: {normal}',
+                tokenPlaceholder: 'APIトークン（オプション）'
             }
         };
 
@@ -300,6 +329,7 @@
             document.querySelector('h2').textContent = translations[lang].subtitle;
             document.querySelector('#dropText').textContent = translations[lang].dropText;
             document.querySelector('.hint').textContent = translations[lang].privacy;
+            document.querySelector('#tokenInput').placeholder = translations[lang].tokenPlaceholder;
 
             document.querySelectorAll('.lang-switch button').forEach(btn => {
                 btn.classList.remove('active');
@@ -396,6 +426,13 @@
             };
 
             xhr.open('POST', 'check', true);
+
+            // 添加 Token 认证头
+            const token = document.getElementById('tokenInput').value.trim();
+            if (token) {
+                xhr.setRequestHeader('Authorization', 'Bearer ' + token);
+            }
+
             xhr.send(formData);
         }
     </script>

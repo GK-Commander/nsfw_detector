@@ -19,7 +19,7 @@ def load_config_from_file():
     config_path = '/tmp/config'
     config_values = {}
     loaded_config = {}
-    
+
     try:
         if os.path.exists(config_path):
             with open(config_path, 'r') as f:
@@ -30,7 +30,7 @@ def load_config_from_file():
                             key, value = map(str.strip, line.split('=', 1))
                             # 将配置键转换为大写
                             key = key.upper()
-                            
+
                             # 尝试转换为适当的类型
                             try:
                                 # 首先尝试转换为float
@@ -42,24 +42,24 @@ def load_config_from_file():
                             except ValueError:
                                 # 如果转换失败，保持为字符串
                                 loaded_config[key] = value
-                                
+
                             config_values[key] = loaded_config[key]
                         except ValueError:
                             logger.warning(f"无法解析配置行: {line}")
-            
+
             # 记录加载的配置
             if loaded_config:
                 logger.info("配置加载详情:")
                 logger.info("-" * 50)
                 for key, value in loaded_config.items():
                     logger.info(f"{key:25s} = {value:<15}")
-            
+
         else:
             logger.warning(f"配置文件{config_path}不存在，使用默认配置")
-    
+
     except Exception as e:
         logger.error(f"读取配置文件时出错: {str(e)}")
-    
+
     return config_values
 
 # 基础配置
@@ -93,14 +93,14 @@ MIME_TO_EXT = {
     'image/heic': '.heic',
     'image/avif': '.avif',
     'image/jxl': '.jxl',
-    
+
     # PDF格式
     'application/pdf': '.pdf',
-    
+
     # 文档格式 (新增)
     'application/msword': '.doc',
     'application/vnd.openxmlformats-officedocument.wordprocessingml.document': '.docx',
-    
+
     # 视频和容器格式
     'video/mp4': '.mp4',
     'video/x-msvideo': '.avi',
@@ -108,7 +108,7 @@ MIME_TO_EXT = {
     'video/quicktime': '.mov',
     'video/x-ms-wmv': '.wmv',
     'video/webm': '.webm',
-    'video/MP2T': '.ts',    
+    'video/MP2T': '.ts',
     'video/x-flv': '.flv',
     'video/3gpp': '.3gp',
     'video/3gpp2': '.3g2',
@@ -126,7 +126,7 @@ MIME_TO_EXT = {
     'video/divx': '.divx',
     'video/x-vob': '.vob',
     'video/x-m2v': '.m2v',
-    
+
     # 压缩格式
     'application/x-rar-compressed': '.rar',
     'application/x-rar': '.rar',
@@ -143,7 +143,7 @@ MIME_TO_EXT = {
 }
 
 # 文件扩展名集合
-IMAGE_EXTENSIONS = {'.jpg', '.jpeg', '.png', '.gif', '.bmp', '.webp', '.tiff', '.tga', 
+IMAGE_EXTENSIONS = {'.jpg', '.jpeg', '.png', '.gif', '.bmp', '.webp', '.tiff', '.tga',
                    '.ppm', '.pgm', '.pbm', '.pnm', '.svg', '.pcx', '.psd', '.ico',
                    '.heif', '.heic', '.avif', '.jxl'}
 
@@ -151,7 +151,7 @@ VIDEO_EXTENSIONS = {'.mp4', '.avi', '.mkv', '.mov', '.wmv', '.webm', '.ts', '.fl
                    '.3gp', '.3g2', '.m4v', '.mxf', '.ogm', '.rv', '.dv', '.asf',
                    '.f4v', '.m2ts', '.yuv', '.mpg', '.mpeg', '.divx', '.vob', '.m2v'}
 
-ARCHIVE_EXTENSIONS = {'.7z', '.rar', '.zip', '.gz', '.tar', '.bz2', '.xz', 
+ARCHIVE_EXTENSIONS = {'.7z', '.rar', '.zip', '.gz', '.tar', '.bz2', '.xz',
                      '.lzma', '.zst', '.cab'}
 
 # 添加新的文档扩展名集合
@@ -166,9 +166,9 @@ DOCUMENT_MIME_TYPES = {
 # MIME 类型集合
 IMAGE_MIME_TYPES = {mime for mime, ext in MIME_TO_EXT.items() if mime.startswith('image/')}
 VIDEO_MIME_TYPES = {mime for mime, ext in MIME_TO_EXT.items() if mime.startswith('video/')}
-ARCHIVE_MIME_TYPES = {mime for mime, ext in MIME_TO_EXT.items() if 
-    mime.startswith('application/') and 
-    any(keyword in mime for keyword in ['zip', 'rar', '7z', 'gzip', 'tar', 
+ARCHIVE_MIME_TYPES = {mime for mime, ext in MIME_TO_EXT.items() if
+    mime.startswith('application/') and
+    any(keyword in mime for keyword in ['zip', 'rar', '7z', 'gzip', 'tar',
         'bzip2', 'xz', 'lzma', 'zstd', 'cab'])}
 PDF_MIME_TYPES = {'application/pdf'}
 
@@ -182,6 +182,7 @@ FFMPEG_MAX_FRAMES = 20
 FFMPEG_TIMEOUT = 1800
 CHECK_ALL_FILES = 0
 MAX_INTERVAL_SECONDS = 30
+AUTH_TOKEN = None  # API认证Token，设置后需要在请求头中携带Token
 
 # 从文件加载配置并更新全局变量
 file_config = load_config_from_file()
@@ -195,6 +196,6 @@ __all__ = [
     'DOCUMENT_EXTENSIONS',  # 新增
     'IMAGE_MIME_TYPES', 'VIDEO_MIME_TYPES', 'ARCHIVE_MIME_TYPES', 'PDF_MIME_TYPES',
     'DOCUMENT_MIME_TYPES',  # 新增
-    'SUPPORTED_MIME_TYPES', 'MAX_FILE_SIZE', 'NSFW_THRESHOLD', 'FFMPEG_MAX_FRAMES', 
-    'FFMPEG_TIMEOUT', 'CHECK_ALL_FILES', 'MAX_INTERVAL_SECONDS'
+    'SUPPORTED_MIME_TYPES', 'MAX_FILE_SIZE', 'NSFW_THRESHOLD', 'FFMPEG_MAX_FRAMES',
+    'FFMPEG_TIMEOUT', 'CHECK_ALL_FILES', 'MAX_INTERVAL_SECONDS', 'AUTH_TOKEN'
 ]

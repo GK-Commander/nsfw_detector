@@ -68,4 +68,7 @@ RUN chmod -R 755 /root/.cache
 # 源代码复制
 COPY app.py config.py processors.py utils.py index.html /app/
 
+# 暴露端口
+EXPOSE 3333
+
 CMD ["python3", "app.py"]
