@@ -1,80 +1,89 @@
 # NSFW Detector
 
-[中文指南](README_cn.md) | [日本語ガイド](README_jp.md)
+> Fork版本
+> 较原版
+> - 新增auth认证请求头
+> - 使用环境变量配置(移除config配置文件)
+> - 新增docker-compose.yml部署
+> - 修复dockerfile过期依赖
 
-## Introduction
+## 简介
 
-This is an NSFW content detector based on [Falconsai/nsfw_image_detection](https://huggingface.co/Falconsai/nsfw_image_detection).  
-Model: google/vit-base-patch16-224-in21k
+这是一个 NSFW 内容检测器，它基于 [Falconsai/nsfw_image_detection](https://huggingface.co/Falconsai/nsfw_image_detection) 。
+模型: google/vit-base-patch16-224-in21k
 
+相比其它常见的 NSFW 检测器，这个检测器的优势在于：
 
-Compared to other common NSFW detectors, this detector has the following advantages:
+* 基于 AI ，准确度更好。
+* 支持纯 CPU 推理，可以运行在大部分服务器上。
+* 自动调度多个 CPU 加速推理。
+* 简单判断，只有两个类别：nsfw 和 normal。
+* 以 API 的方式提供服务，更方便集成到其它应用中。
+* 基于 Docker 部署，便于分布式部署。
+* 纯本地，保护您的数据安全。
 
-* AI-based, providing better accuracy.
-* Supports CPU-only inference, can run on most servers.
-* Automatically utilizes multiple CPUs to accelerate inference.
-* Simple classification with only two categories: nsfw and normal.
-* Provides service via API, making it easier to integrate with other applications.
-* Docker-based deployment, suitable for distributed deployment.
-* Purely local, protecting your data security.
+### 性能需求
 
-### Performance Requirements
+运行这个模型最多需要 2GB 的内存。不需要显卡的支持。
+在同时处理大量请求时，可能需要更多的内存。
 
-Running this model requires up to 2GB of memory. No GPU support is needed.  
-When handling a large number of requests simultaneously, more memory may be required.
+### 支持的文件类型
 
-### Supported File Types
+这个检测器支持检查的文件类型：
 
-This detector supports checking the following file types:
+* ✅ 图片（已支持）
+* ✅ PDF 文件（已支持）
+* ✅ 视频（已支持）
+* ✅ 压缩包中的文件（已支持）
+* ✅ Doc,Docx（已支持）
 
-* ✅ Images (supported)
-* ✅ PDF files (supported)
-* ✅ Videos (supported)
-* ✅ Files in compressed packages (supported)
-* ✅ Doc,Docx (supported)
+## 快速开始
 
-## Quick Start
-
-### Start the API Server
+### docker compose部署（推荐）
 
 ```bash
-docker run -d -p 3333:3333 --name nsfw-detector vxlink/nsfw_detector:latest
+# 1. 创建nsfw_detector目录
+mkdir -p /root/nsfw_detector && cd /root/nsfw_detector
+
+# 2. 下载docker-compose.yml文件
+wget https://git.221022.xyz/https://raw.githubusercontent.com/chaos-zhu/nsfw_detector/refs/heads/main/docker-compose.yml
+
+# 3. 启动服务【注意docker-compose.yml文件中支持的环境变量】
+docker compose up -d
 ```
 
-To check files in local paths on the server, mount the path to the container.
-It is recommended to keep the mounted path consistent with the path inside the container to avoid confusion.
+### docker部署（不推荐）
 
 ```bash
-docker run -d -p 3333:3333 -v /path/to/files:/path/to/files --name nsfw-detector vxlink/nsfw_detector:latest
+docker run -d -p 3333:3333 --name nsfw-detector chaoszhu/nsfw_detector:latest
 ```
+支持的系统架构：`x86_64`、`ARM64(此版本未构建)`
 
-Supported architectures: `x86_64`, `ARM64`.
+### 环境变量
 
-### Use the API for Content Checking
+| Option | Default | Description |
+|--------|---------|-------------|
+| `nsfw_threshold` | `0.8` | 检测阈值 (0-1) |
+| `ffmpeg_max_frames` | `20` | FFmpeg处理最大帧数 |
+| `ffmpeg_max_timeout` | `1800` | FFmpeg处理超时时间 |
+| `auth_token` | `None` | API 认证 token (optional) |
+| `HF_ENDPOINT` | `None` | 大陆机器需配置镜像下载抱脸托管模型，推荐https://hf-mirror.com (optional) |
+
+
+### 使用内置的 Web 界面进行检测
+
+访问地址：[http://localhost:3333](http://localhost:3333)
+
+### 使用 API 进行内容检查
 
 ```bash
-# Detection
+# 检测
 curl -X POST -F "file=@/path/to/image.jpg" http://localhost:3333/check
 
-# Check Local Files
+# 检查本地的文件
 curl -X POST -F "path=/path/to/image.jpg" http://localhost:3333/check
 ```
 
-### Use the Built-in Web Interface for Detection
+## 许可证
 
-Visit: [http://localhost:3333](http://localhost:3333)
-
-## Edit Configuration File
-
-Now, you can configure the detector's behavior by mounting the /tmp directory and creating a file named config in that directory.
-You can refer to the [config](config) file as a reference.
-
-* `nsfw_threshold` Sets what NSFW value threshold must be exceeded for a target file to be considered a match and returned as a result.
-* `ffmpeg_max_frames` Maximum number of frames to process when handling videos.
-* `ffmpeg_max_timeout` Timeout limit when processing videos.
-
-Additionally, since the /tmp directory serves as a temporary directory in the container, configuring it on a high-performance storage device will improve performance.
-
-## License
-
-This project is open-source under the Apache 2.0 license.
+本项目基于 Apache 2.0 许可证开源。
