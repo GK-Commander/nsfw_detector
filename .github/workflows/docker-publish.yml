@@ -6,7 +6,7 @@ on:
       image_name:
         description: 'gkcom416/nsfw_detector'
         required: true
-        default: 'gkcom416/nsfw_detector:latest'
+        default: 'gkcom416/nsfw_detector'
       tag:
         description: 'Image tag'
         required: false
