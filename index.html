@@ -261,15 +261,27 @@
             max-height: 85vh; /* 更大的最大高度 */
             min-height: 420px; /* 增大最小高度，文字更清晰 */
             padding: 12px;
+            transition: all 0.18s ease;
+        }
+
+        /* 当媒体尺寸较小时让框收缩到媒体尺寸 */
+        .preview-frame.shrink {
+            display: inline-flex;
+            width: auto;
+            min-height: unset;
+            padding: 8px;
+            box-shadow: 0 1px 8px rgba(0,0,0,0.06);
         }
 
         .preview-frame img,
         .preview-frame video {
-            width: 100%;
+            /* 不强制拉伸小图：使用 auto 尺寸并限制最大值 */
+            width: auto;
             height: auto; /* 保持长宽比 */
+            max-width: 100%; /* 不超出容器宽度 */
+            max-height: 82vh; /* 受视口高度限制 */
             object-fit: contain; /* 在容器内完整显示并保持比例 */
             display: block;
-            max-height: 82vh;
         }
 
         .preview-info {
@@ -452,15 +464,37 @@
                 const url = URL.createObjectURL(file);
                 imgPreview.src = url;
                 imgPreview.style.display = 'block';
-                imgPreview.onload = () => URL.revokeObjectURL(url);
+                imgPreview.onload = () => {
+                    URL.revokeObjectURL(url);
+                    adjustPreviewFrame(imgPreview);
+                };
             } else if (type.startsWith('video/')) {
                 const url = URL.createObjectURL(file);
                 videoPreview.src = url;
                 videoPreview.style.display = 'block';
-                videoPreview.onloadeddata = () => URL.revokeObjectURL(url);
+                videoPreview.onloadeddata = () => {
+                    URL.revokeObjectURL(url);
+                    adjustPreviewFrame(videoPreview);
+                };
             } else {
                 // 非媒体文件，仅显示文件信息
                 previewInfo.textContent += ' · 无法预览该类型文件';
+            }
+        }
+
+        // 根据媒体原始尺寸决定是否让外层框收缩到媒体尺寸
+        function adjustPreviewFrame(mediaEl) {
+            try {
+                const naturalW = mediaEl.tagName.toLowerCase() === 'img' ? (mediaEl.naturalWidth || 0) : (mediaEl.videoWidth || 0);
+                const wrapperWidth = Math.max(0, previewWrapper.clientWidth - 32); // 预留内边距
+
+                if (naturalW > 0 && naturalW < wrapperWidth) {
+                    previewFrame.classList.add('shrink');
+                } else {
+                    previewFrame.classList.remove('shrink');
+                }
+            } catch (e) {
+                previewFrame.classList.remove('shrink');
             }
         }
 
