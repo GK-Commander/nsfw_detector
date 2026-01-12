@@ -61,7 +61,7 @@
 
         .container {
             width: 100%;
-            max-width: 600px;
+            max-width: 1200px; /* 扩大容器以容纳更大预览 */
             text-align: center;
         }
 
@@ -237,6 +237,49 @@
                 font-size: 1em;
             }
         }
+
+        /* 预览区域样式：保持源文件宽高比，按设备分辨率缩放并水平居中 */
+        .preview-wrapper {
+            width: 100%;
+            max-width: 2200px; /* 放大预览最大宽度 */
+            margin: 0 auto 18px auto;
+            display: none; /* 初始隐藏，直到有文件被选择或拖入 */
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .preview-frame {
+            width: 100%;
+            background: #fff;
+            border-radius: 8px;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+            max-height: 85vh; /* 更大的最大高度 */
+            min-height: 420px; /* 增大最小高度，文字更清晰 */
+            padding: 12px;
+        }
+
+        .preview-frame img,
+        .preview-frame video {
+            width: 100%;
+            height: auto; /* 保持长宽比 */
+            object-fit: contain; /* 在容器内完整显示并保持比例 */
+            display: block;
+            max-height: 82vh;
+        }
+
+        .preview-info {
+            margin-top: 10px;
+            color: #333;
+            font-size: 1.05em; /* 放大文字 */
+            text-align: center;
+            word-break: break-all;
+            padding: 0 8px;
+        }
     </style>
 </head>
 
@@ -253,6 +296,15 @@
         <div class="container">
             <h1>NSFW 文件检测</h1>
             <h2>支持图像，PDF，视频文件。</h2>
+            <!-- 预览区域（展示在上传框上方） -->
+            <div class="preview-wrapper" id="previewWrapper" aria-hidden="true">
+                <div class="preview-frame" id="previewFrame">
+                    <img id="imgPreview" alt="file preview" style="display:none;" />
+                    <video id="videoPreview" controls style="display:none;"></video>
+                </div>
+                <div class="preview-info" id="previewInfo"></div>
+            </div>
+
             <div class="upload-zone" id="dropZone">
                 <div id="dropText">点击或拖拽文件到此处上传</div>
                 <input type="file" id="fileInput">
@@ -346,6 +398,12 @@
         const progressBar = document.getElementById('progressBar');
         const progressBarFill = document.getElementById('progressBarFill');
         const result = document.getElementById('result');
+        const scores = document.getElementById('scores');
+
+        const previewWrapper = document.getElementById('previewWrapper');
+        const imgPreview = document.getElementById('imgPreview');
+        const videoPreview = document.getElementById('videoPreview');
+        const previewInfo = document.getElementById('previewInfo');
 
         dropZone.addEventListener('click', () => fileInput.click());
         fileInput.addEventListener('change', handleFile);
@@ -363,12 +421,47 @@
             e.preventDefault();
             dropZone.classList.remove('dragover');
             const file = e.dataTransfer.files[0];
-            uploadFile(file);
+            if (file) {
+                showPreview(file);
+                uploadFile(file);
+            }
         });
 
         function handleFile(e) {
             const file = e.target.files[0];
-            if (file) uploadFile(file);
+            if (file) {
+                showPreview(file);
+                uploadFile(file);
+            }
+        }
+
+        // 显示文件预览（图片/视频）。保持原始宽高比并在容器内自适应缩放。
+        function showPreview(file) {
+            previewWrapper.setAttribute('aria-hidden', 'false');
+            previewWrapper.style.display = 'flex';
+            const type = file.type || '';
+            previewInfo.textContent = file.name + ' · ' + Math.round(file.size / 1024) + ' KB';
+
+            // Reset
+            imgPreview.style.display = 'none';
+            videoPreview.style.display = 'none';
+            imgPreview.src = '';
+            videoPreview.src = '';
+
+            if (type.startsWith('image/')) {
+                const url = URL.createObjectURL(file);
+                imgPreview.src = url;
+                imgPreview.style.display = 'block';
+                imgPreview.onload = () => URL.revokeObjectURL(url);
+            } else if (type.startsWith('video/')) {
+                const url = URL.createObjectURL(file);
+                videoPreview.src = url;
+                videoPreview.style.display = 'block';
+                videoPreview.onloadeddata = () => URL.revokeObjectURL(url);
+            } else {
+                // 非媒体文件，仅显示文件信息
+                previewInfo.textContent += ' · 无法预览该类型文件';
+            }
         }
 
         function uploadFile(file) {
